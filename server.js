@@ -6,7 +6,22 @@ app.use(express.json());
 
 const token = process.env.WHATSAPP_TOKEN;
 const phoneNumberId = process.env.PHONE_NUMBER_ID;
+const verifyToken = "myverifytoken123"; // must match Meta
 
+// 🔹 Webhook verification (GET)
+app.get('/webhook', (req, res) => {
+  const mode = req.query['hub.mode'];
+  const challenge = req.query['hub.challenge'];
+  const tokenSent = req.query['hub.verify_token'];
+
+  if (mode && tokenSent === verifyToken) {
+    return res.status(200).send(challenge);
+  } else {
+    return res.sendStatus(403);
+  }
+});
+
+// 🔹 Receive messages (POST)
 app.post('/webhook', async (req, res) => {
   const message = req.body.entry?.[0]?.changes?.[0]?.value?.messages?.[0];
 
